@@ -1,0 +1,10 @@
+usr
+.d
+*.1
+github-unreleased
+!cmd/github-unreleased*
+cover.html
+cover.out
+profile.out
+*.rpm
+*.deb
