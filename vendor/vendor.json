@@ -19,6 +19,11 @@
 			"revisionTime": "2016-03-21T19:18:31-04:00"
 		},
 		{
+			"path": "github.com/google/go-github/github",
+			"revision": "94a3cd9f531888fe4a03487276c0adb887428e77",
+			"revisionTime": "2016-09-07T14:10:27-07:00"
+		},
+		{
 			"path": "github.com/mrtazz/checkmake/logger",
 			"revision": "69c7c4f32c9cb51cc18e3ccdbd305c7407c676a0",
 			"revisionTime": "2016-09-13T21:41:06-04:00"
@@ -54,6 +59,16 @@
 			"path": "github.com/stretchr/testify/require",
 			"revision": "d77da356e56a7428ad25149ca77381849a6a5232",
 			"revisionTime": "2016-06-15T11:26:46+02:00"
+		},
+		{
+			"path": "golang.org/x/oauth2",
+			"revision": "3c3a985cb79f52a3190fbc056984415ca6763d01",
+			"revisionTime": "2016-08-26T16:14:08-07:00"
+		},
+		{
+			"path": "golang.org/x/oauth2/internal",
+			"revision": "3c3a985cb79f52a3190fbc056984415ca6763d01",
+			"revisionTime": "2016-08-26T16:14:08-07:00"
 		}
 	]
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/mrtazz/github-unreleased/config"
 	"github.com/mrtazz/github-unreleased/logger"
+	"github.com/mrtazz/github-unreleased/unreleased"
 
 	docopt "github.com/docopt/docopt-go"
 )
@@ -53,11 +54,8 @@ func main() {
 			logger.Error(fmt.Sprintf("Unable to parse config file at '%q': %q",
 				configPath, err.Error()))
 		}
-		token, err := cfg.GetConfigValue("token")
-		if err == nil {
-			logger.Info(fmt.Sprintf("found token: %q", token))
-		}
 	}
+	fmt.Println(cfg)
 
 	if args["<repository>"] != false {
 		fmt.Println(args)
