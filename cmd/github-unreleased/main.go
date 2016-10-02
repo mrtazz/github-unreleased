@@ -9,6 +9,7 @@ import (
 	"github.com/mrtazz/github-unreleased/unreleased"
 
 	docopt "github.com/docopt/docopt-go"
+	"github.com/olekukonko/tablewriter"
 )
 
 var (
@@ -55,11 +56,41 @@ func main() {
 				configPath, err.Error()))
 		}
 	}
-	fmt.Println(cfg)
 
-	if args["<repository>"] != false {
-		fmt.Println(args)
+	ur, err := unreleased.NewUnreleasedWithConfig(cfg)
+
+	if args["<repository>"] != nil {
+		reposlug := args["<repository>"].(string)
+		commits, err := ur.GetUnreleasedForRepo(reposlug)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		// we store all the commits with their 4 fields SHA, Message, Name, URL
+		data := make([][]string, 0, len(commits))
+
+		for _, commit := range commits {
+			data = append(data, []string{
+				commit.Sha[0:10], commit.Author, commit.Message, commit.URL})
+		}
+		fmt.Printf("\n ==> There are %d commits since the last release for %q\n",
+			len(commits), reposlug)
+		printTable([]string{"SHA", "Author", "Message", "URL"}, data)
 	}
 
-	os.Exit(1)
+}
+
+func printTable(header []string, data [][]string) {
+	table := tablewriter.NewWriter(os.Stdout)
+
+	if len(header) > 0 {
+		table.SetHeader(header)
+	}
+
+	table.SetCenterSeparator(" ")
+	table.SetColumnSeparator(" ")
+	table.SetRowSeparator(" ")
+	table.SetAutoWrapText(true)
+
+	table.AppendBulk(data)
+	table.Render()
 }
