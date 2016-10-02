@@ -18,17 +18,23 @@ type Commit struct {
 	URL     string
 }
 
-type UnreleasedCommits []Commit
+type UnreleasedRepoCommits struct {
+	RepoSlug string
+	Tag      string
+	Commits  []Commit
+}
 
-type Unreleased struct {
+type UnreleasedCommits []UnreleasedRepoCommits
+
+type UnreleasedChecker struct {
 	cfg      *config.Config
 	ghClient *gogithub.Client
 }
 
 // NewUnreleasedWithConfig returns an Unreleased type with the passed in
 // configuration set
-func NewUnreleasedWithConfig(cfg *config.Config) (ret *Unreleased, err error) {
-	ret = &Unreleased{}
+func NewUnreleasedWithConfig(cfg *config.Config) (ret *UnreleasedChecker, err error) {
+	ret = &UnreleasedChecker{}
 	// we ignore the error return here as GetConfigValue returns an empty string on err
 	token, _ := cfg.GetConfigValue("token")
 	ret.ghClient, err = buildGithubClient(token)
@@ -37,9 +43,12 @@ func NewUnreleasedWithConfig(cfg *config.Config) (ret *Unreleased, err error) {
 }
 
 // GetUnreleasedForRepo returns an UnreleasedCommits list
-func (ur *Unreleased) GetUnreleasedForRepo(slug string) (ret UnreleasedCommits,
+func (ur *UnreleasedChecker) GetUnreleasedForRepo(slug string) (ret UnreleasedCommits,
 	err error) {
 
+	ret = UnreleasedCommits{UnreleasedRepoCommits{}}
+
+	ret[0].RepoSlug = slug
 	slugParts := strings.Split(slug, "/")
 
 	tags, _, err := ur.ghClient.Repositories.ListTags(slugParts[0],
@@ -48,7 +57,7 @@ func (ur *Unreleased) GetUnreleasedForRepo(slug string) (ret UnreleasedCommits,
 		return ret, err
 	}
 	if len(tags) == 0 {
-		return ret, fmt.Errorf("no tags")
+		return ret, nil
 	}
 	logger.Debug(fmt.Sprintf("Got tag %q for %q/%q", *tags[0].Name, slugParts[0], slugParts[1]))
 	comparison, _, err := ur.ghClient.Repositories.CompareCommits(slugParts[0],
@@ -57,15 +66,54 @@ func (ur *Unreleased) GetUnreleasedForRepo(slug string) (ret UnreleasedCommits,
 		return ret, err
 	}
 
+	ret[0].Tag = *tags[0].Name
+
 	logger.Debug(fmt.Sprintf("Found %d unreleased commits", len(comparison.Commits)))
 
 	for _, commit := range comparison.Commits {
 		logger.Debug(fmt.Sprintf("Parsing %+v", commit))
-		ret = append(ret, Commit{
+		ret[0].Commits = append(ret[0].Commits, Commit{
 			Sha:     *commit.SHA,
 			Message: *commit.Commit.Message,
 			Author:  *commit.Commit.Author.Name,
 			URL:     *commit.HTMLURL})
+	}
+
+	return
+}
+
+func (ur *UnreleasedChecker) GetUnreleasedForCurrentUser(showForks bool) (ret UnreleasedCommits,
+	err error) {
+
+	opt := &gogithub.RepositoryListOptions{
+		Affiliation: "owner",
+		ListOptions: gogithub.ListOptions{PerPage: 50}}
+
+	var allRepos []*gogithub.Repository
+	for {
+		repos, resp, err := ur.ghClient.Repositories.List("", opt)
+		if err != nil {
+			return ret, err
+		}
+		allRepos = append(allRepos, repos...)
+		if resp.NextPage == 0 {
+			break
+		}
+		opt.ListOptions.Page = resp.NextPage
+	}
+
+	for _, repo := range allRepos {
+		slug := fmt.Sprintf("%s/%s", *repo.Owner.Login, *repo.Name)
+		if *repo.Fork == true && showForks == false {
+			continue
+		}
+		repoCommits, err := ur.GetUnreleasedForRepo(slug)
+		if err != nil {
+			logger.Info(fmt.Sprintf("Unable to get data for %q: %s",
+				slug, err.Error()))
+		} else {
+			ret = append(ret, repoCommits[0])
+		}
 	}
 
 	return

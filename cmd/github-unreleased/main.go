@@ -24,6 +24,8 @@ var (
   -h --help               Show this screen.
   --version               Show version.
   --debug                 Enable debug mode
+  --forks                 Also show unreleased commits in forks
+  --no-tags               Also show repositories with no releases
 `
 
 	version   = ""
@@ -58,25 +60,39 @@ func main() {
 	}
 
 	ur, err := unreleased.NewUnreleasedWithConfig(cfg)
+	var unreleasedData unreleased.UnreleasedCommits
 
 	if args["<repository>"] != nil {
 		reposlug := args["<repository>"].(string)
-		commits, err := ur.GetUnreleasedForRepo(reposlug)
+		unreleasedData, err = ur.GetUnreleasedForRepo(reposlug)
 		if err != nil {
 			fmt.Println(err.Error())
 		}
-		// we store all the commits with their 4 fields SHA, Message, Name, URL
-		data := make([][]string, 0, len(commits))
+	} else {
+		unreleasedData, err = ur.GetUnreleasedForCurrentUser(args["--forks"].(bool))
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+	}
 
-		for _, commit := range commits {
+	for _, unreleasedRepoCommits := range unreleasedData {
+		// we store all the commits with their 4 fields SHA, Message, Name, URL
+		data := make([][]string, 0, len(unreleasedRepoCommits.Commits))
+
+		for _, commit := range unreleasedRepoCommits.Commits {
 			data = append(data, []string{
 				commit.Sha[0:10], commit.Author, commit.Message, commit.URL})
 		}
-		fmt.Printf("\n ==> There are %d commits since the last release for %q\n",
-			len(commits), reposlug)
-		printTable([]string{"SHA", "Author", "Message", "URL"}, data)
-	}
+		if len(unreleasedRepoCommits.Commits) > 0 {
+			fmt.Printf("\n ==> There are %d commits since tag %q for %q\n",
+				len(unreleasedRepoCommits.Commits), unreleasedRepoCommits.Tag,
+				unreleasedRepoCommits.RepoSlug)
+			printTable([]string{"SHA", "Author", "Message", "URL"}, data)
+		} else if unreleasedRepoCommits.Tag == "" && args["--no-tags"].(bool) == true {
+			fmt.Printf("\n ==> No tags for  %q\n", unreleasedRepoCommits.RepoSlug)
+		}
 
+	}
 }
 
 func printTable(header []string, data [][]string) {

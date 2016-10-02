@@ -26,7 +26,19 @@ committed to a repository after its most recent release.
 **--debug**
 :    Enable debug mode
 
+**--forks**
+:    Also show unreleased commits in forks
+
+**--no-tags**
+:    Also show repositories with no releases
+
 # CONFIGURATION
+**github-unreleased** reads an ini configuration file at
+~/.github-unreleased.ini and reads configuration values from its **default**
+section. The following configuration fields are supported:
+
+**token**
+:    the GitHub OAuth token to use
 
 
 # EXIT STATUS
