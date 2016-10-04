@@ -26,11 +26,11 @@ committed to a repository after its most recent release.
 **--debug**
 :    Enable debug mode
 
-**--forks**
+**--include-forks**
 :    Also show unreleased commits in forks
 
-**--no-tags**
-:    Also show repositories with no releases
+**--inlcude-repos-without-tags**
+:    Also show repositories with no tags
 
 # CONFIGURATION
 **github-unreleased** reads an ini configuration file at

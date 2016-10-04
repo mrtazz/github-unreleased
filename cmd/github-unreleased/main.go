@@ -21,11 +21,11 @@ var (
   github-unreleased --version
 
   Options:
-  -h --help               Show this screen.
-  --version               Show version.
-  --debug                 Enable debug mode
-  --forks                 Also show unreleased commits in forks
-  --no-tags               Also show repositories with no releases
+  -h --help                       Show this screen.
+  --version                       Show version.
+  --debug                         Enable debug mode
+  --include-forks                 Also show unreleased commits in forks
+  --include-repos-without-tags    Also show repositories with no releases
 `
 
 	version   = ""
@@ -34,6 +34,9 @@ var (
 	goversion = ""
 
 	configPath = fmt.Sprintf("%s/.github-unreleased.ini", os.Getenv("HOME"))
+
+	reposWithoutTags = false
+	includeForks     = false
 )
 
 func main() {
@@ -49,6 +52,9 @@ func main() {
 	if args["--debug"] != false {
 		logger.SetLogLevel(logger.DebugLevel)
 	}
+
+	reposWithoutTags = args["--include-repos-without-tags"].(bool)
+	includeForks = args["--include-forks"].(bool)
 
 	var cfg *config.Config
 	if _, err := os.Stat(configPath); err == nil {
@@ -69,7 +75,7 @@ func main() {
 			fmt.Println(err.Error())
 		}
 	} else {
-		unreleasedData, err = ur.GetUnreleasedForCurrentUser(args["--forks"].(bool))
+		unreleasedData, err = ur.GetUnreleasedForCurrentUser(includeForks)
 		if err != nil {
 			fmt.Println(err.Error())
 		}
@@ -88,7 +94,7 @@ func main() {
 				len(unreleasedRepoCommits.Commits), unreleasedRepoCommits.Tag,
 				unreleasedRepoCommits.RepoSlug)
 			printTable([]string{"SHA", "Author", "Message", "URL"}, data)
-		} else if unreleasedRepoCommits.Tag == "" && args["--no-tags"].(bool) == true {
+		} else if unreleasedRepoCommits.Tag == "" && reposWithoutTags == true {
 			fmt.Printf("\n ==> No tags for  %q\n", unreleasedRepoCommits.RepoSlug)
 		}
 
