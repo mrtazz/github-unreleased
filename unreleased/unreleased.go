@@ -11,6 +11,7 @@ import (
 	"strings"
 )
 
+// Commit is the exported type to represent commit data
 type Commit struct {
 	Sha     string
 	Message string
@@ -18,23 +19,28 @@ type Commit struct {
 	URL     string
 }
 
-type UnreleasedRepoCommits struct {
+// RepoCommits is the struct to represent a repo with it's most
+// recent tag and all unreleased commits
+type RepoCommits struct {
 	RepoSlug string
 	Tag      string
 	Commits  []Commit
 }
 
-type UnreleasedCommits []UnreleasedRepoCommits
+// Commits is a slice of UnreleasedRepoCommits
+type Commits []RepoCommits
 
-type UnreleasedChecker struct {
+// Checker is the client struct to init and run methods on to get
+// unreleased commits
+type Checker struct {
 	cfg      *config.Config
 	ghClient *gogithub.Client
 }
 
-// NewUnreleasedWithConfig returns an Unreleased type with the passed in
+// NewCheckerWithConfig returns an Unreleased type with the passed in
 // configuration set
-func NewUnreleasedWithConfig(cfg *config.Config) (ret *UnreleasedChecker, err error) {
-	ret = &UnreleasedChecker{}
+func NewCheckerWithConfig(cfg *config.Config) (ret *Checker, err error) {
+	ret = &Checker{}
 	// we ignore the error return here as GetConfigValue returns an empty string on err
 	token, _ := cfg.GetConfigValue("token")
 	ret.ghClient, err = buildGithubClient(token)
@@ -43,10 +49,9 @@ func NewUnreleasedWithConfig(cfg *config.Config) (ret *UnreleasedChecker, err er
 }
 
 // GetUnreleasedForRepo returns an UnreleasedCommits list
-func (ur *UnreleasedChecker) GetUnreleasedForRepo(slug string) (ret UnreleasedCommits,
-	err error) {
+func (ur *Checker) GetUnreleasedForRepo(slug string) (ret Commits, err error) {
 
-	ret = UnreleasedCommits{UnreleasedRepoCommits{}}
+	ret = Commits{RepoCommits{}}
 
 	ret[0].RepoSlug = slug
 	slugParts := strings.Split(slug, "/")
@@ -82,7 +87,9 @@ func (ur *UnreleasedChecker) GetUnreleasedForRepo(slug string) (ret UnreleasedCo
 	return
 }
 
-func (ur *UnreleasedChecker) GetUnreleasedForCurrentUser(showForks bool) (ret UnreleasedCommits,
+// GetUnreleasedForCurrentUser returns unreleased commits from all repo for
+// the current user, optionally including forks
+func (ur *Checker) GetUnreleasedForCurrentUser(showForks bool) (ret Commits,
 	err error) {
 
 	opt := &gogithub.RepositoryListOptions{

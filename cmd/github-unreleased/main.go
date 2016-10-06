@@ -65,8 +65,8 @@ func main() {
 		}
 	}
 
-	ur, err := unreleased.NewUnreleasedWithConfig(cfg)
-	var unreleasedData unreleased.UnreleasedCommits
+	ur, err := unreleased.NewCheckerWithConfig(cfg)
+	var unreleasedData unreleased.Commits
 
 	if args["<repository>"] != nil {
 		reposlug := args["<repository>"].(string)
