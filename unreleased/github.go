@@ -6,6 +6,7 @@ import (
 	"github.com/mrtazz/github-unreleased/logger"
 	"golang.org/x/oauth2"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 )
@@ -15,6 +16,20 @@ import (
 type Tag struct {
 	Name string
 	Date time.Time
+}
+
+// Tags is the collection type for Tag
+type Tags []Tag
+
+// implementation methods for Tag to provide the sort interface
+func (t Tags) Len() int {
+	return len(t)
+}
+func (t Tags) Swap(i, j int) {
+	t[i], t[j] = t[j], t[i]
+}
+func (t Tags) Less(i, j int) bool {
+	return t[i].Date.Before(t[j].Date)
 }
 
 // Commit is the exported type to represent commit data
@@ -49,7 +64,7 @@ type Repositories []Repository
 // FetcherInterface defines the interface to satisfy for fetching information about
 // repositories
 type FetcherInterface interface {
-	FetchTags(slug string) ([]Tag, error)
+	FetchTags(slug string) (Tags, error)
 	FetchRepos(affiliation string, perPage int) (Repositories, error)
 	CompareCommits(slug string, base string, head string) ([]Commit, error)
 }
@@ -65,8 +80,8 @@ func NewFetcher(token string) *Fetcher {
 }
 
 // FetchTags implements tag fetching for GitHub
-func (f *Fetcher) FetchTags(slug string) (ret []Tag, err error) {
-	ret = make([]Tag, 0, 10)
+func (f *Fetcher) FetchTags(slug string) (ret Tags, err error) {
+	ret = make(Tags, 0, 10)
 	slugParts := strings.Split(slug, "/")
 	opt := &gogithub.ListOptions{PerPage: 50}
 	for {
@@ -90,6 +105,7 @@ func (f *Fetcher) FetchTags(slug string) (ret []Tag, err error) {
 		}
 		opt.Page = resp.NextPage
 	}
+	sort.Sort(sort.Reverse(ret))
 	return ret, err
 }
 
