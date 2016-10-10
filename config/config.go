@@ -33,13 +33,12 @@ func (c *Config) GetConfigValue(keyName string) (value string, err error) {
 
 	section, err := c.iniFile.GetSection("default")
 
-	if err == nil {
-		key, keyError := section.GetKey(keyName)
-		if keyError != nil {
-			return "", keyError
-		}
-		return key.String(), nil
+	if err != nil {
+		return "", err
 	}
-
-	return
+	key, keyError := section.GetKey(keyName)
+	if keyError != nil {
+		return "", keyError
+	}
+	return key.String(), nil
 }
