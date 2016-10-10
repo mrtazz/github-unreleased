@@ -70,7 +70,8 @@ func main() {
 
 	if args["<repository>"] != nil {
 		reposlug := args["<repository>"].(string)
-		unreleasedData, err = ur.GetUnreleasedForRepo(reposlug)
+		unreleasedData = make(unreleased.Commits, 1)
+		unreleasedData[0], err = ur.GetUnreleasedForRepo(reposlug)
 		if err != nil {
 			fmt.Println(err.Error())
 		}
@@ -90,12 +91,12 @@ func main() {
 				commit.Sha[0:10], commit.Author, commit.Message, commit.URL})
 		}
 		if len(unreleasedRepoCommits.Commits) > 0 {
-			fmt.Printf("\n ==> There are %d commits since tag %q for %q\n",
-				len(unreleasedRepoCommits.Commits), unreleasedRepoCommits.Tag,
-				unreleasedRepoCommits.RepoSlug)
+			fmt.Printf("\n ==> There are %d commits since tag %q (%s) for %q\n",
+				len(unreleasedRepoCommits.Commits), unreleasedRepoCommits.Tag.Name,
+				unreleasedRepoCommits.Tag.Date.Format("01/02/2006"), unreleasedRepoCommits.Slug)
 			printTable([]string{"SHA", "Author", "Message", "URL"}, data)
-		} else if unreleasedRepoCommits.Tag == "" && reposWithoutTags == true {
-			fmt.Printf("\n ==> No tags for  %q\n", unreleasedRepoCommits.RepoSlug)
+		} else if unreleasedRepoCommits.Tag.Name == "" && reposWithoutTags == true {
+			fmt.Printf("\n ==> No tags for  %q\n", unreleasedRepoCommits.Slug)
 		}
 
 	}
