@@ -13,7 +13,10 @@ date: REPLACE_DATE
 
 # DESCRIPTION
 `github-unreleased` is a tool that will tell you how many commits have been
-committed to a repository after its most recent release.
+committed to a repository after its most recent release. It can be passed a
+specific repository slug (like mrtazz/github-unreleased) or by default will
+check all repositories for the currently authenticated user that have at least
+one tag and are not forks.
 
 # OPTIONS
 
