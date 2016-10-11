@@ -1,3 +1,6 @@
+// Package unreleased implements the unreleased checker logic and this file
+// deals with the GitHub interface parts
+//go:generate mockgen -source=github.go -package=unreleased -destination=github_mock.go
 package unreleased
 
 import (

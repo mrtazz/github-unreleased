@@ -10,7 +10,6 @@ import (
 // Checker is the client struct to init and run methods on to get
 // unreleased commits
 type Checker struct {
-	cfg     *config.Config
 	fetcher FetcherInterface
 }
 
@@ -65,6 +64,8 @@ func (ur *Checker) GetUnreleasedForRepo(slug string) (ret RepoCommits, err error
 // the current user, optionally including forks
 func (ur *Checker) GetUnreleasedForCurrentUser(showForks bool) (ret Commits,
 	err error) {
+
+	ret = Commits{}
 
 	allRepos, err := ur.fetcher.FetchRepos("owner", 50)
 	if err != nil {
