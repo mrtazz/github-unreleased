@@ -67,7 +67,7 @@ func (ur *Checker) GetUnreleasedForCurrentUser(showForks bool) (ret Commits,
 
 	ret = Commits{}
 
-	allRepos, err := ur.fetcher.FetchRepos("owner", 50)
+	allRepos, err := ur.fetcher.FetchRepos("", "owner", 50)
 	if err != nil {
 		logger.Info(fmt.Sprintf("Unable to get repos: %s", err.Error()))
 		return

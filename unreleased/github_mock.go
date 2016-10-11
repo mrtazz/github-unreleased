@@ -39,15 +39,15 @@ func (_mr *_MockFetcherInterfaceRecorder) FetchTags(arg0 interface{}) *gomock.Ca
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "FetchTags", arg0)
 }
 
-func (_m *MockFetcherInterface) FetchRepos(affiliation string, perPage int) (Repositories, error) {
-	ret := _m.ctrl.Call(_m, "FetchRepos", affiliation, perPage)
+func (_m *MockFetcherInterface) FetchRepos(user string, affiliation string, perPage int) (Repositories, error) {
+	ret := _m.ctrl.Call(_m, "FetchRepos", user, affiliation, perPage)
 	ret0, _ := ret[0].(Repositories)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-func (_mr *_MockFetcherInterfaceRecorder) FetchRepos(arg0, arg1 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "FetchRepos", arg0, arg1)
+func (_mr *_MockFetcherInterfaceRecorder) FetchRepos(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "FetchRepos", arg0, arg1, arg2)
 }
 
 func (_m *MockFetcherInterface) CompareCommits(slug string, base string, head string) ([]Commit, error) {

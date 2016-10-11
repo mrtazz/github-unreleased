@@ -6,6 +6,7 @@ import (
 	"time"
 
 	gomock "github.com/golang/mock/gomock"
+	gogithub "github.com/google/go-github/github"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/mrtazz/github-unreleased/config"
@@ -25,7 +26,7 @@ func TestMockedFetchRepos(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockFetcher := NewMockFetcherInterface(mockCtrl)
-	mockFetcher.EXPECT().FetchRepos("owner", 50).Return(
+	mockFetcher.EXPECT().FetchRepos("", "owner", 50).Return(
 		Repositories{Repository{Slug: "mrtazz/test", IsFork: false}}, nil)
 	mockFetcher.EXPECT().CompareCommits("mrtazz/test",
 		"0.1.0", "HEAD").Return(
@@ -51,7 +52,7 @@ func TestMockedFetchReposFailed(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockFetcher := NewMockFetcherInterface(mockCtrl)
-	mockFetcher.EXPECT().FetchRepos("owner", 50).Return(
+	mockFetcher.EXPECT().FetchRepos("", "owner", 50).Return(
 		Repositories{}, fmt.Errorf("failed to get repo"))
 
 	c := &Checker{fetcher: mockFetcher}
@@ -68,7 +69,7 @@ func TestMockedFetchReposIsFork(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockFetcher := NewMockFetcherInterface(mockCtrl)
-	mockFetcher.EXPECT().FetchRepos("owner", 50).Return(
+	mockFetcher.EXPECT().FetchRepos("", "owner", 50).Return(
 		Repositories{Repository{Slug: "mrtazz/test", IsFork: true}}, nil)
 
 	c := &Checker{fetcher: mockFetcher}
@@ -84,7 +85,7 @@ func TestMockedUnreleasedForRepoFailed(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockFetcher := NewMockFetcherInterface(mockCtrl)
-	mockFetcher.EXPECT().FetchRepos("owner", 50).Return(
+	mockFetcher.EXPECT().FetchRepos("", "owner", 50).Return(
 		Repositories{Repository{Slug: "mrtazz/test", IsFork: false}}, nil)
 
 	mockFetcher.EXPECT().FetchTags("mrtazz/test").Return(
@@ -103,7 +104,7 @@ func TestMockedNoTags(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockFetcher := NewMockFetcherInterface(mockCtrl)
-	mockFetcher.EXPECT().FetchRepos("owner", 50).Return(
+	mockFetcher.EXPECT().FetchRepos("", "owner", 50).Return(
 		Repositories{Repository{Slug: "mrtazz/test", IsFork: false}}, nil)
 
 	mockFetcher.EXPECT().FetchTags("mrtazz/test").Return(
@@ -122,7 +123,7 @@ func TestMockedCompareCommitsFailed(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockFetcher := NewMockFetcherInterface(mockCtrl)
-	mockFetcher.EXPECT().FetchRepos("owner", 50).Return(
+	mockFetcher.EXPECT().FetchRepos("", "owner", 50).Return(
 		Repositories{Repository{Slug: "mrtazz/test", IsFork: false}}, nil)
 	mockFetcher.EXPECT().CompareCommits("mrtazz/test",
 		"0.1.0", "HEAD").Return(
@@ -136,4 +137,40 @@ func TestMockedCompareCommitsFailed(t *testing.T) {
 	// assertions
 	assert.Equal(t, nil, err)
 	assert.Equal(t, 0, len(ret))
+}
+
+// some integration tests which call to actual GitHub
+func TestSimpleGitHubFetchRepos(t *testing.T) {
+
+	f := &Fetcher{
+		ghClient: gogithub.NewClient(nil)}
+
+	repos, err := f.FetchRepos("mrtazz", "owner", 50)
+
+	assert.Equal(t, nil, err)
+	assert.Equal(t, true, len(repos) > 1)
+}
+
+func TestSimpleGitHubCompareCommits(t *testing.T) {
+
+	f := &Fetcher{
+		ghClient: gogithub.NewClient(nil)}
+
+	commits, err := f.CompareCommits("mrtazz/checkmake",
+		"e27165fa24654c003d55ca85cc36195b768f1324",
+		"55457d1dd6198f2c1f7c95151855accb39a50198")
+
+	assert.Equal(t, nil, err)
+	assert.Equal(t, 1, len(commits))
+}
+
+func TestSimpleGitHubFetchTags(t *testing.T) {
+
+	f := &Fetcher{
+		ghClient: gogithub.NewClient(nil)}
+
+	tags, err := f.FetchTags("mrtazz/restclient-cpp")
+
+	assert.Equal(t, nil, err)
+	assert.Equal(t, true, len(tags) > 1)
 }

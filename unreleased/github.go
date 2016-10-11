@@ -68,7 +68,8 @@ type Repositories []Repository
 // repositories
 type FetcherInterface interface {
 	FetchTags(slug string) (Tags, error)
-	FetchRepos(affiliation string, perPage int) (Repositories, error)
+	FetchRepos(user string, affiliation string, perPage int) (Repositories,
+		error)
 	CompareCommits(slug string, base string, head string) ([]Commit, error)
 }
 
@@ -113,15 +114,15 @@ func (f *Fetcher) FetchTags(slug string) (ret Tags, err error) {
 }
 
 // FetchRepos implements repo fetching for GitHub
-func (f *Fetcher) FetchRepos(affiliation string,
-	perPage int) (ret Repositories, err error) {
+func (f *Fetcher) FetchRepos(user string,
+	affiliation string, perPage int) (ret Repositories, err error) {
 	ret = Repositories{}
 	opt := &gogithub.RepositoryListOptions{
 		Affiliation: affiliation,
 		ListOptions: gogithub.ListOptions{PerPage: perPage}}
 
 	for {
-		repos, resp, err := f.ghClient.Repositories.List("", opt)
+		repos, resp, err := f.ghClient.Repositories.List(user, opt)
 		if err != nil {
 			return ret, err
 		}
