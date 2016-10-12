@@ -60,3 +60,11 @@ contains the GitHub OAuth token as follows:
 [default]
 token = 1234foobla
 ```
+
+## Caveats
+Using an OAuth token grants you 5000 requests per hour against the GitHub API.
+However in order to find the newest tag, `github-unreleased` will hydrate
+every tag with its underlying commit data as tags don't have a date field
+themselves. This means on a project with a lot of tags, you could run out of
+API requests before getting all tag information. If there's a better way to do
+this, I'd love to hear about it.
