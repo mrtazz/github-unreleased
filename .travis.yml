@@ -1,0 +1,27 @@
+sudo: false
+language: go
+go:
+- tip
+addons:
+  apt:
+    packages:
+    - rpm
+    - pandoc
+before_install:
+- gem install fpm
+- gem install package_cloud
+- go get github.com/axw/gocov/gocov
+- go get github.com/mattn/goveralls
+- if ! go get github.com/golang/tools/cmd/cover; then go get golang.org/x/tools/cmd/cover;
+  fi
+script:
+- make coverage && $HOME/gopath/bin/goveralls -coverprofile=cover.out -service=travis-ci
+deploy:
+  provider: script
+  script: make deploy-packages
+  skip_cleanup: true
+  on:
+    tags: true
+env:
+  global:
+    secure: uACrCbY6bN6FFRSyX6I/IrkOTbXPIX3EuOI6t+b6LrD8LXQ5HDwzDB9X1dXauRnbyilltyb8tytayAX4NAvfmIhz1GDOcAjmwtAtrGciCrTZKF1A8wkM8v0/FfLVpQH9lyaLLzhxGFlLMqdju+acfD1kQinpiQC3gtXdl0gKauYdvaM/lNJJRY6DCD/QQ2UE88IPDV9DYAZ8b6peqcRBUunJjR5hmaYmlE0Zf9bmz0PrKF2VaE8/k1AtfY0MKUw3xK4Y88zrnlqwyKrgelWvwhOx0SpOfMKfz8kNOsHa0KclL4I/+y9TswrlW7+EDNMHuEGlQ+SKhsirBFxKG9mJ7myq4P4NqmCdlggsw8KbAyFSWKQ/5l2osK9HvtOXe4H/VM7duYkpZgTBjmIu74Y80tWDE/Y56Bp2TvOVF13QStORLA8DX3NXUbg6tNEeab/cKkSeXIYhMwd5mdSyI10ZdqCuDCJfESVTsyEOk0g4xh+hHu8WcxZM99dFqYzzj6+C8m4ETAx7xBT0i3896o0tDE3w5kHXwxHMSNJ+uA5pqWZU9A2De7HOfUUD1tp2zSkgyw63fadQFdSAoeGSwR3wN/vYOAZbFMnMkECEYiKEzmrSrjPnsxc1gJ9Fmp6Q16w9xY6Vkgh1nEIz9Fgj+a3dALWevj0tx0Rc8mL8YPl0E3A=
