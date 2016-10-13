@@ -26,6 +26,18 @@
 			"revisionTime": "2016-03-21T19:18:31-04:00"
 		},
 		{
+			"checksumSHA1": "EKlPqAOSRdB3oivOJPneqQm+Skk=",
+			"path": "github.com/golang/mock/gomock",
+			"revision": "bd3c8e81be01eef76d4b503f5e687d2d1354d2d9",
+			"revisionTime": "2016-01-21T18:51:14Z"
+		},
+		{
+			"checksumSHA1": "ks9nCA68MefWDMUIjIF/zJwpTuw=",
+			"path": "github.com/golang/mock/gomock/mock_matcher",
+			"revision": "bd3c8e81be01eef76d4b503f5e687d2d1354d2d9",
+			"revisionTime": "2016-01-21T18:51:14Z"
+		},
+		{
 			"path": "github.com/google/go-github/github",
 			"revision": "94a3cd9f531888fe4a03487276c0adb887428e77",
 			"revisionTime": "2016-09-07T14:10:27-07:00"
